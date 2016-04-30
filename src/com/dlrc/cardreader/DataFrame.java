@@ -35,7 +35,9 @@ public class DataFrame {
 
         while (frameLength == 0 || i < frameLength) {
             try {
-                int d = in.read();
+                int d = -1;
+                if (in.available() > 0)
+                    d = in.read();
                 if (d >= 0) {
                     if (frameLength == 0) {
                         frameLength = d;
