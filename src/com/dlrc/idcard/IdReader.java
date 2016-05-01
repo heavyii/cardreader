@@ -56,6 +56,10 @@ public class IdReader {
                     d = in.read();
                 if (d >= 0) {
                     buf[i++] = (byte) d;
+
+                    //前三个开始字符是AA AA AA
+                    if (i < 3 && d != 0xAA)
+                        i = 0;
                 }
 
                 if (i == HEADLEN) {
@@ -72,9 +76,9 @@ public class IdReader {
             }
 
             //超时
-            if (counter++ > buf.length + 100) {
+            if (counter++ > 1024) {
                 if (System.currentTimeMillis() > beginTime + timeout) {
-                    return buf;
+                    return null;
                 }
             }
         }
@@ -91,10 +95,11 @@ public class IdReader {
         try {
             out.write(cmd);
             byte[] data = recvPackage();
-            System.out.println(Utils.ByteArrayToHexString(data));
             //失败返回的数据包是11字节
-            if (data != null && data.length > 11)
+            if (data != null && data.length > 11) {
+                System.out.println(Utils.ByteArrayToHexString(data));
                 return data;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,10 +107,10 @@ public class IdReader {
     }
 
     /**
-     * 读取身份证号码
+     * 读取身份证信息
      * @return
      */
-    public String getId() {
+    public IdInfo readIdInfo() {
         try {
             byte[] buf = new byte[1024];
             int readLen;
@@ -117,15 +122,11 @@ public class IdReader {
             if (sendCMD(CMD_SELECT) == null)
                 return null;
 
-            int counter = 100;
+            int counter = 5;
             while (counter-- > 0) {
                 rdata = sendCMD(CMD_READ);
                 if (rdata != null && rdata[0] != 0x00) {
-                    byte[] idNumber = Arrays.copyOfRange(rdata, 136, 136 + 36);
-                    StringBuffer sb = new StringBuffer();
-                    for (int i = 0; i < 18; i++)
-                        sb.append((char)idNumber[i*2]);
-                    return sb.toString();
+                    return new IdInfo(rdata);
                 }
             }
         } catch (Exception e) {
