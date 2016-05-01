@@ -3,6 +3,8 @@ package com.dlrc.idcard;
 import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.CharBuffer;
 import java.util.Arrays;
 
 /**
@@ -10,11 +12,17 @@ import java.util.Arrays;
  */
 public class IdInfo {
 
-    private byte[] data;
-
-    private byte[] textData;
-
+    private String name;
+    private String sex;
+    private String nation;
+    private String birthday;
+    private String address;
     private String ID;
+    private String issue;
+    private String beginTime;
+    private String endTime;
+
+    private static final String CHARTSETNAME = "utf-16le";
 
     /**
      * data[16:256] 文字信息
@@ -22,9 +30,7 @@ public class IdInfo {
      */
 
     public IdInfo(byte[] data) {
-        this.data = data;
-
-        textData = Arrays.copyOfRange(data, 14, 256);
+        byte[] textData = Arrays.copyOfRange(data, 14, 256);
         ByteInputStream in = new ByteInputStream(textData, 0, textData.length);
 
         try {
@@ -33,10 +39,12 @@ public class IdInfo {
             //姓名
             buf = new byte[30];
             in.read(buf);
+            name = new String(buf, CHARTSETNAME);
 
             //姓别
             buf = new byte[2];
             in.read(buf);
+            sex = parseShortString(buf);
 
             //民族
             buf = new byte[4];
@@ -45,31 +53,56 @@ public class IdInfo {
             //出生
             buf = new byte[16];
             in.read(buf);
+            birthday = parseShortString(buf);
 
             //住址
             buf = new byte[70];
             in.read(buf);
+            address = new String(buf, CHARTSETNAME);
 
             //身份证号码
             buf = new byte[36];
             in.read(buf);
-            parseId(buf);
+            ID = parseShortString(buf);
 
+            //签发机关
+            buf = new byte[30];
+            in.read(buf);
+            issue = new String(buf, CHARTSETNAME);
+
+            //有效日期起始
+            buf = new byte[16];
+            in.read(buf);
+            beginTime = parseShortString(buf);
+
+            //有效日期截止
+            buf = new byte[16];
+            in.read(buf);
+            endTime = parseShortString(buf);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void parseId(byte[] idNumber) {
+    private String parseShortString(byte[] buf) {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < 18; i++)
-            sb.append((char)idNumber[i*2]);
-        ID = sb.toString();
+        for (int i = 0; i < buf.length/2; i++)
+            sb.append((char)buf[i*2]);
+        return sb.toString();
     }
 
+    @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("IdInfo# " + ID);
-        return sb.toString();
+        return "IdInfo{" +
+                "name='" + name + '\'' +
+                ", sex='" + sex + '\'' +
+                ", nation='" + nation + '\'' +
+                ", birthday='" + birthday + '\'' +
+                ", address='" + address + '\'' +
+                ", ID='" + ID + '\'' +
+                ", issue='" + issue + '\'' +
+                ", beginTime='" + beginTime + '\'' +
+                ", endTime='" + endTime + '\'' +
+                '}';
     }
 }
