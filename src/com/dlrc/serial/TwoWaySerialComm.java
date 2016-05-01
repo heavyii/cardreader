@@ -36,7 +36,11 @@ public class TwoWaySerialComm implements IOStream
         }
     }
 
-    public void connect ( String portName ) throws Exception
+    public void connect ( String portName) throws Exception {
+        connect(portName, 9600);
+    }
+
+    public void connect (String portName, int boundrate) throws Exception
     {
         portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
         if ( portIdentifier.isCurrentlyOwned() )
@@ -50,7 +54,7 @@ public class TwoWaySerialComm implements IOStream
             if ( commPort instanceof SerialPort )
             {
                 serialPort = (SerialPort) commPort;
-                serialPort.setSerialPortParams(9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+                serialPort.setSerialPortParams(boundrate,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
 
                 in = serialPort.getInputStream();
                 out = serialPort.getOutputStream();

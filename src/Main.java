@@ -2,6 +2,7 @@ import com.dlrc.cardreader.CardMifare1;
 import com.dlrc.cardreader.DataFrame;
 import com.dlrc.common.Utils;
 
+import com.dlrc.idcard.IdReader;
 import com.dlrc.serial.IOStream;
 import com.dlrc.serial.TwoWaySerialComm;
 
@@ -22,21 +23,20 @@ public class Main {
         try
         {
 
-            comPort.connect("COM4");
-
+            comPort.connect("COM7", 115200);
             IOStream ioStream = comPort;
             OutputStream out = ioStream.getOutputStream();
             InputStream in = ioStream.getInputStream();
 
+            {
+                IdReader idReader = new IdReader(in, out);
 
-            CardMifare1 card = new CardMifare1(in, out);
-            if (card.initCard()) {
-                for (int i = 0; i < 3; i++) {
-                    byte[] data = card.read(i);
-                    System.out.println("read block: " + i + "# " + Utils.ByteArrayToHexString(data));
+                String idNumber = null;
+                while (idNumber == null) {
+                    idNumber = idReader.getId();
                 }
+                System.out.println("身份证号码是：" + idNumber);
             }
-            card.halt();
 
             comPort.close();
         }
