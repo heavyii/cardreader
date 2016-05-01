@@ -39,16 +39,21 @@ public class IdInfo {
             //姓名
             buf = new byte[30];
             in.read(buf);
-            name = new String(buf, CHARTSETNAME);
+            name = new String(buf, CHARTSETNAME).trim();
 
             //姓别
             buf = new byte[2];
             in.read(buf);
             sex = parseShortString(buf);
+            if (sex.equals("1"))
+                sex = "男";
+            else
+                sex = "女";
 
             //民族
             buf = new byte[4];
             in.read(buf);
+            nation = NationCode.getName(parseShortString(buf));
 
             //出生
             buf = new byte[16];
@@ -58,7 +63,7 @@ public class IdInfo {
             //住址
             buf = new byte[70];
             in.read(buf);
-            address = new String(buf, CHARTSETNAME);
+            address = new String(buf, CHARTSETNAME).trim();
 
             //身份证号码
             buf = new byte[36];
@@ -68,7 +73,7 @@ public class IdInfo {
             //签发机关
             buf = new byte[30];
             in.read(buf);
-            issue = new String(buf, CHARTSETNAME);
+            issue = new String(buf, CHARTSETNAME).trim();
 
             //有效日期起始
             buf = new byte[16];

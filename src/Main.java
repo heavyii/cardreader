@@ -29,7 +29,7 @@ public class Main {
             OutputStream out = ioStream.getOutputStream();
             InputStream in = ioStream.getInputStream();
 
-            for (int i = 0; i < 10; i++){
+            for (int i = 0; i < 3; i++){
                 IdReader idReader = new IdReader(in, out);
 
                 IdInfo idInfo = null;
